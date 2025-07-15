@@ -1,0 +1,114 @@
+{
+  "title": "2.2: FeeCollector: Claiming Collected Fees",
+  "id": "rHzmq5Ao4Yllzq3mjlAIofNH8XvaVZiUcRXbws6pBPI=",
+  "originalId": 4673,
+  "position": 3,
+  "type": "text",
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This tour covers the final stage of the fee lifecycle in the `FeeCollector` contract: distribution. We will see how the accumulated fees are claimed by the different stakeholders (protocol, LPs, and operators) and the access control mechanisms that ensure only authorized parties can withdraw funds.",
+      "title": "",
+      "id": "55724"
+    },
+    {
+      "type": "highlight",
+      "description": "Let's start with the `claimProtocolFees` function. It allows an admin to withdraw the fees collected for the protocol. Note the `onlyAdmin` modifier on line 173, which restricts access.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 170,
+          "end": 186
+        }
+      ],
+      "title": "",
+      "id": "55725"
+    },
+    {
+      "type": "highlight",
+      "description": "The `onlyAdmin` modifier checks that the caller has the `DEFAULT_ADMIN_ROLE`. If the caller does not have this role, the transaction is reverted.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 58,
+          "end": 62
+        }
+      ],
+      "title": "",
+      "id": "55726"
+    },
+    {
+      "type": "highlight",
+      "description": "The function's logic is as follows:\n1.  **Line 176**: It calculates the total claimable amount.\n2.  **Line 177**: It ensures the amount is not zero.\n3.  **Line 181**: It updates the `protocolFeesClaimed` counter. This is done before the external call on the next line to follow the **checks-effects-interactions pattern** and prevent re-entrancy vulnerabilities.\n4.  **Line 182**: It transfers the stablecoin amount to the `protocolFeeReceiver`.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 170,
+          "end": 186
+        }
+      ],
+      "title": "",
+      "id": "55727"
+    },
+    {
+      "type": "highlight",
+      "description": "Next is the `claimLPFees` function. It's similar to the previous one, but requires the `DISTRIBUTOR_ROLE` (line 195), showing a different level of permission for a different stakeholder. The internal logic for calculating and transferring fees is the same.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 192,
+          "end": 207
+        }
+      ],
+      "title": "",
+      "id": "55728"
+    },
+    {
+      "type": "highlight",
+      "description": "Finally, the `claimOperatorFees` function allows workers to claim their fees. Access is restricted to the `WORKER_ROLE` by the modifier on line 216. Again, the core logic is analogous to the other claim functions.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 213,
+          "end": 229
+        }
+      ],
+      "title": "",
+      "id": "55729"
+    },
+    {
+      "type": "mcq",
+      "description": "An address has been granted the `DISTRIBUTOR_ROLE`. Based on the access control patterns shown, which action can this address successfully perform?\n\nOptions:\n\n A). Call `claimProtocolFees()` to withdraw protocol fees.\n\nB). Call `claimOperatorFees()` to withdraw operator fees.\n\nC). Call `claimLPFees()` to withdraw fees for liquidity providers.\n\nD). Call any of the claim functions, as the `DISTRIBUTOR_ROLE` has broad permissions.\n\n\nCorrect: C). Call `claimLPFees()` to withdraw fees for liquidity providers.\n\nExplanation: The `FeeCollector` contract uses specific roles for each claim function. The `onlyRole(DISTRIBUTOR_ROLE)` modifier on `claimLPFees` (line 195) means only an address with that role can call it. The `claimProtocolFees` function requires the `DEFAULT_ADMIN_ROLE`, and `claimOperatorFees` requires the `WORKER_ROLE`.",
+      "title": "",
+      "id": "55741",
+      "text": "An address has been granted the `DISTRIBUTOR_ROLE`. Based on the access control patterns shown, which action can this address successfully perform?",
+      "answers": [
+        "Call `claimProtocolFees()` to withdraw protocol fees.",
+        "Call `claimOperatorFees()` to withdraw operator fees.",
+        "Call `claimLPFees()` to withdraw fees for liquidity providers.",
+        "Call any of the claim functions, as the `DISTRIBUTOR_ROLE` has broad permissions."
+      ],
+      "correct": 2,
+      "explanation": "The `FeeCollector` contract uses specific roles for each claim function. The `onlyRole(DISTRIBUTOR_ROLE)` modifier on `claimLPFees` (line 195) means only an address with that role can call it. The `claimProtocolFees` function requires the `DEFAULT_ADMIN_ROLE`, and `claimOperatorFees` requires the `WORKER_ROLE`."
+    },
+    {
+      "type": "highlight",
+      "description": "To provide transparency, the contract includes three public view functions (`claimableProtocolFees`, `claimableLPFees`, and `claimableOperatorFees`). These allow anyone to query the amount of fees currently available to be claimed by each party without needing any special permissions.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 308,
+          "end": 329
+        }
+      ],
+      "title": "",
+      "id": "55730"
+    },
+    {
+      "type": "textOnly",
+      "description": "In summary, the `FeeCollector` contract implements a clear and secure process for distributing fees. It uses role-based access control to ensure that only authorized addresses can claim funds for the protocol, LPs, and operators, while public view functions offer transparency on the state of collected fees.",
+      "title": "",
+      "id": "55731"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "title": "2.3: FeeCollector: Administrative Configuration",
+  "id": "IMSnyaMrWaoWLQOvNJdASv+2bFyV+RvgPp2/P0lYJP0=",
+  "originalId": 4674,
+  "position": 4,
+  "type": "text",
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This tour will explore the administrative functions in the `FeeCollector` contract, focusing on how the contract owner can configure and manage the fee system. We will cover initialization, configuration setters, tiered fee configuration, and upgradability.",
+      "title": "",
+      "id": "55692"
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "genius-contracts/src/fees/FeeCollector.sol"
+      ],
+      "description": "The `initialize` function is called once to set up the contract's initial state. It configures the admin address, the stablecoin for fee payments, the protocol fee percentage, and the initial fee receiver addresses. The function includes checks to prevent setting null addresses and ensures the protocol fee doesn't exceed 100%.",
+      "title": "",
+      "id": "55693"
+    },
+    {
+      "type": "highlight",
+      "description": "Here's the `initialize` function. It sets up the initial owner, stablecoin, protocol fee, and the fee receivers. Notice the `initializer` modifier from `OpenZeppelin`'s upgradeable contracts, which ensures this function only runs once. It also grants the `DEFAULT_ADMIN_ROLE` to the provided admin address, giving them control over the contract's administrative functions.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 75,
+          "end": 103
+        }
+      ],
+      "title": "",
+      "id": "55694"
+    },
+    {
+      "type": "highlight",
+      "description": "Next are the address setter functions. These functions, `setProtocolFeeReceiver`, `setLPFeeReceiver`, `setOperatorFeeReceiver`, and `setVault`, allow the admin to change the addresses for the respective fee receivers and the vault. Each of these functions is restricted to the admin by the `onlyAdmin` modifier. These external functions call internal counterparts, which contain the core logic.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 235,
+          "end": 261
+        }
+      ],
+      "title": "",
+      "id": "55695"
+    },
+    {
+      "type": "highlight",
+      "description": "The contract also provides setters for fee values. `setProtocolFee` allows the admin to adjust the percentage of basis point fees that go to the protocol. `setTargetChainMinFee` lets the admin set a minimum fee for transactions to a specific destination chain. Both are `onlyAdmin` functions.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 267,
+          "end": 281
+        }
+      ],
+      "title": "",
+      "id": "55696"
+    },
+    {
+      "type": "highlight",
+      "description": "For more complex fee structures, the contract uses tiered fees. The `setFeeTiers` function allows the admin to configure a series of fee tiers based on the order amount. This function takes two arrays: `_thresholdAmounts` and `_bpsFees`.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 288,
+          "end": 293
+        }
+      ],
+      "title": "",
+      "id": "55697"
+    },
+    {
+      "type": "highlight",
+      "description": "The internal `_setFeeTiers` function contains the main logic. It first validates the inputs, ensuring the arrays are not empty and have matching lengths. It then clears the existing `feeTiers` array. Finally, it iterates through the new tiers, validates that the thresholds are in ascending order and that the **BPS fees** are valid, and then populates the `feeTiers` array.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 428,
+          "end": 465
+        }
+      ],
+      "title": "",
+      "id": "55698"
+    },
+    {
+      "type": "mcq",
+      "description": "An admin calls `setFeeTiers` with `_thresholdAmounts = [1000, 5000, 4000]` and `_bpsFees = [10, 20, 15]`. Which validation check within the `_setFeeTiers` function will cause this call to fail?\n\nOptions:\n\n A). The check for array length mismatch on line 435.\n\nB). The check for ascending threshold order on line 446.\n\nC). The check for an invalid BPS fee on line 450.\n\nD). The check for empty arrays on line 432.\n\n\nCorrect: B). The check for ascending threshold order on line 446.\n\nExplanation: The correct answer is B. The function requires the `_thresholdAmounts` array to be sorted in ascending order. In the provided input `[1000, 5000, 4000]`, the third element (4000) is less than the second (5000). During the loop's third iteration (when `i` is 2), the condition `_thresholdAmounts[2] <= prevThreshold` (i.e., `4000 <= 5000`) will be true, causing the transaction to revert. The other checks pass because the array lengths match, the BPS fees are valid, and the arrays are not empty.",
+      "title": "",
+      "id": "55702",
+      "text": "An admin calls `setFeeTiers` with `_thresholdAmounts = [1000, 5000, 4000]` and `_bpsFees = [10, 20, 15]`. Which validation check within the `_setFeeTiers` function will cause this call to fail?",
+      "answers": [
+        "The check for array length mismatch on line 435.",
+        "The check for ascending threshold order on line 446.",
+        "The check for an invalid BPS fee on line 450.",
+        "The check for empty arrays on line 432."
+      ],
+      "correct": 1,
+      "explanation": "The correct answer is B. The function requires the `_thresholdAmounts` array to be sorted in ascending order. In the provided input `[1000, 5000, 4000]`, the third element (4000) is less than the second (5000). During the loop's third iteration (when `i` is 2), the condition `_thresholdAmounts[2] <= prevThreshold` (i.e., `4000 <= 5000`) will be true, causing the transaction to revert. The other checks pass because the array lengths match, the BPS fees are valid, and the arrays are not empty."
+    },
+    {
+      "type": "highlight",
+      "description": "The `setInsuranceFeeTiers` and its internal counterpart `_setInsuranceFeeTiers` function (lines 300-305 and 473-510) follows the exact same logic as `setFeeTiers`, but for the insurance fees. It also has the same validation checks for array lengths and ascending thresholds.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 473,
+          "end": 510
+        }
+      ],
+      "title": "",
+      "id": "55699"
+    },
+    {
+      "type": "highlight",
+      "description": "Finally, the contract's upgradability is managed by the `_authorizeUpgrade` function. This function is part of the `UUPS (Universal Upgradeable Proxy Standard)` pattern. By overriding this function and restricting it with the `onlyAdmin` modifier, the contract ensures that only the admin can authorize an upgrade to a new implementation contract.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 609,
+          "end": 611
+        }
+      ],
+      "title": "",
+      "id": "55700"
+    },
+    {
+      "type": "textOnly",
+      "description": "This concludes our tour of the administrative configuration of the `FeeCollector` contract. We've seen how it's initialized, how its various parameters can be configured through **setter functions**, and how it handles complex tiered fee structures and contract upgrades. This administrative flexibility is a key aspect of the contract's design.",
+      "title": "",
+      "id": "55701"
+    }
+  ]
+}

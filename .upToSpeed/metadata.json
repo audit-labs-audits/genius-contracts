@@ -1,0 +1,34 @@
+{
+  "packageName": "genius-contracts",
+  "packageVersion": 1,
+  "hash": "84b299b07c9695b3d3752f031f74a3ed83b7b2f9",
+  "numberOfTours": 8,
+  "titleOfTours": [
+    "1.1: Genius Protocol: High-Level Overview",
+    "2.1: FeeCollector: Fee Collection from Vault",
+    "2.2: FeeCollector: Claiming Collected Fees",
+    "2.3: FeeCollector: Administrative Configuration",
+    "3.1: GeniusVault: Overview",
+    "3.2: GeniusVault Interface (IGeniusVault.sol)",
+    "3.3: GeniusVaultCore: State and Configuration",
+    "Want to learn more?"
+  ],
+  "totalNumberOfSteps": 97,
+  "filesCovered": [
+    "README.md",
+    "genius-contracts/docs/Protocol.md",
+    "genius-contracts/src/GeniusRouter.sol",
+    "genius-contracts/src/GeniusVault.sol",
+    "genius-contracts/src/interfaces/IGeniusVault.sol",
+    "genius-actions/src/actions/solver/solver-lit-impl.ts",
+    "genius-contracts-solana/programs/genius/src/lib.rs",
+    "genius-contracts-solana/programs/genius/src/instructions/fill_order.rs",
+    "genius-contracts/src/GeniusActions.sol",
+    "genius-actions/src/services/blockchain/genius-actions/genius-actions.const.ts",
+    "genius-actions/src/services/blockchain/genius-actions/genius-actions.service.ts",
+    "genius-contracts/src/fees/FeeCollector.sol",
+    "genius-contracts/src/interfaces/IFeeCollector.sol",
+    "genius-contracts/src/GeniusVaultCore.sol"
+  ],
+  "numberOfFilesCovered": 14
+}

@@ -1,0 +1,211 @@
+{
+  "title": "1.1: Genius Protocol: High-Level Overview",
+  "id": "OCuogWgvuThQL9OdSDyQopPs9NSFjbpyzDPqe1JjnTU=",
+  "originalId": 4585,
+  "position": 1,
+  "type": "text",
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "We’ll tour the Genius monorepo – a cross-chain bridge spanning EVM contracts (`genius-contracts`), a Solana Anchor program (`genius-contracts-solana`), and a decentralized off-chain orchestrator (`genius-actions`) – by tracing a cross-chain transfer’s lifecycle.",
+      "title": "",
+      "id": "54790"
+    },
+    {
+      "type": "highlight",
+      "description": "At the root, `README.md` declares this monorepo holds all related repositories for the Genius competition.",
+      "file": "README.md",
+      "highlight": [
+        {
+          "start": 1,
+          "end": 2
+        }
+      ],
+      "title": "",
+      "id": "54791"
+    },
+    {
+      "type": "highlight",
+      "description": "The Protocol overview introduces `Genius` as a cross-chain liquidity and transaction system across **EVM** and **Solana**, using an intent-based architecture (orders, fills, reverts).",
+      "file": "genius-contracts/docs/Protocol.md",
+      "highlight": [
+        {
+          "start": 3,
+          "end": 7
+        }
+      ],
+      "title": "",
+      "id": "54792"
+    },
+    {
+      "type": "textOnly",
+      "description": "The system is built on three pillars:\n* EVM Smart Contracts (`genius-contracts`)\n* Solana Anchor Program (`genius-contracts-solana`)\n* Off-chain Orchestrator on Lit Protocol (`genius-actions`)",
+      "title": "",
+      "id": "54793"
+    },
+    {
+      "type": "highlight",
+      "description": "**User entrypoint** `swapAndCreateOrder(seed, tokensIn[], amountsIn[], target, toApprove, data, owner, destChainId, feeSurplus, receiver, minAmountOut, tokenOut)` atomically swaps input tokens for stablecoin and creates a cross-chain order.",
+      "file": "genius-contracts/src/GeniusRouter.sol",
+      "highlight": [
+        {
+          "start": 56,
+          "end": 66
+        }
+      ],
+      "title": "",
+      "id": "54794"
+    },
+    {
+      "type": "highlight",
+      "description": "The router loops over `tokensIn`, transfers them into the `PROXYCALL` contract, then calls `PROXYCALL.execute` or `approveAddressAndExecute` to run arbitrary swap logic and accrue stablecoin.",
+      "file": "genius-contracts/src/GeniusRouter.sol",
+      "highlight": [
+        {
+          "start": 73,
+          "end": 84
+        }
+      ],
+      "title": "",
+      "id": "54795"
+    },
+    {
+      "type": "highlight",
+      "description": "With the initial swap complete, the contract now holds the stablecoin proceeds. The next step is to formally package the user's cross-chain request. This involves calculating the required fees for the destination chain and then bundling all the details—like the user, amounts, and destination—into a standardized order format. This complete order is then sent to the `GeniusVault`, which locks the funds and emits an event to notify the off-chain system.",
+      "file": "genius-contracts/src/GeniusRouter.sol",
+      "highlight": [
+        {
+          "start": 93,
+          "end": 113
+        }
+      ],
+      "title": "",
+      "id": "54796"
+    },
+    {
+      "type": "highlight",
+      "description": "`createOrder(Order memory order)` in `GeniusVault` enforces Chainlink price checks, amount/chain/token validations, collects fees, transfers stablecoin into the vault, and sets order status.",
+      "file": "genius-contracts/src/GeniusVault.sol",
+      "highlight": [
+        {
+          "start": 69,
+          "end": 81
+        }
+      ],
+      "title": "",
+      "id": "54797"
+    },
+    {
+      "type": "highlight",
+      "description": "`event OrderCreated(destChainId, trader, receiver, seed, orderHash, tokenIn, tokenOut, amountIn, minAmountOut, fee)` is emitted at order creation—this is the off-chain Solver’s trigger.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 109,
+          "end": 120
+        }
+      ],
+      "title": "",
+      "id": "54798"
+    },
+    {
+      "type": "mcq",
+      "description": "The **off-chain Solver** is responsible for executing the user's cross-chain transfer. What **on-chain mechanism** serves as the direct trigger for the Solver to begin processing a new order?\n\nOptions:\n\n A). A `swapAndCreateOrder` function call in `GeniusRouter.sol`.\n\nB). The `OrderCreated` event emitted by `GeniusVault.sol`.\n\nC). The transfer of stablecoin funds into the `GeniusVault.sol` contract.\n\nD). A `getData` call to the `GeniusActions.sol` contract.\n\n\nCorrect: B). The `OrderCreated` event emitted by `GeniusVault.sol`.\n\nExplanation: The `OrderCreated` event is the explicit, structured log that off-chain indexers and Lit Actions are designed to listen for. It contains all the necessary data (`destChainId`, `orderHash`, etc.) to begin processing. While the `swapAndCreateOrder` function and the stablecoin transfer are necessary precursors, the event itself is the formal trigger for the off-chain system. The `GeniusActions.sol` contract is queried by the Solver only after it has been triggered.",
+      "title": "",
+      "id": "54806",
+      "text": "The **off-chain Solver** is responsible for executing the user's cross-chain transfer. What **on-chain mechanism** serves as the direct trigger for the Solver to begin processing a new order?",
+      "answers": [
+        "A `swapAndCreateOrder` function call in `GeniusRouter.sol`.",
+        "The `OrderCreated` event emitted by `GeniusVault.sol`.",
+        "The transfer of stablecoin funds into the `GeniusVault.sol` contract.",
+        "A `getData` call to the `GeniusActions.sol` contract."
+      ],
+      "correct": 1,
+      "explanation": "The `OrderCreated` event is the explicit, structured log that off-chain indexers and Lit Actions are designed to listen for. It contains all the necessary data (`destChainId`, `orderHash`, etc.) to begin processing. While the `swapAndCreateOrder` function and the stablecoin transfer are necessary precursors, the event itself is the formal trigger for the off-chain system. The `GeniusActions.sol` contract is queried by the Solver only after it has been triggered."
+    },
+    {
+      "type": "highlight",
+      "description": "Off-chain `Lit Action` entrypoint `go()` instantiates `ErrorHandlerLit`, calls `solverBase(errorHandler, new LitHelpers(), orchestratorSolanaPubKey, env, rpcs, orders, swapsCalls, arbitraryCalls)`, and returns the execution plan via `Lit.Actions.setResponse`.",
+      "file": "genius-actions/src/actions/solver/solver-lit-impl.ts",
+      "highlight": [
+        {
+          "start": 19,
+          "end": 27
+        }
+      ],
+      "title": "",
+      "id": "54799"
+    },
+    {
+      "type": "highlight",
+      "description": "Solana Anchor entry `pub fn fill_order(ctx: Context<FillOrder>, amount, seed, order_hash, trader, srcChainId, destChainId, tokenIn, fee, minAmountOut) → Result<()>` delegates to `FillOrder::process_instruction(...)`. ",
+      "file": "genius-contracts-solana/programs/genius/src/lib.rs",
+      "highlight": [
+        {
+          "start": 179,
+          "end": 203
+        }
+      ],
+      "title": "",
+      "id": "54800"
+    },
+    {
+      "type": "highlight",
+      "description": "In `#[account(...)] pub orchestrator_state`, the constraints ensure the signer is an authorized orchestrator with `fill_order_permission` before proceeding.",
+      "file": "genius-contracts-solana/programs/genius/src/instructions/fill_order.rs",
+      "highlight": [
+        {
+          "start": 23,
+          "end": 27
+        }
+      ],
+      "title": "",
+      "id": "54801"
+    },
+    {
+      "type": "highlight",
+      "description": "`GeniusActions` is a minimal `ERC-725Y` key-value store (`Ownable` + `ERC165`) that holds on-chain data entries mapping action IDs to implementation hashes.",
+      "file": "genius-contracts/src/GeniusActions.sol",
+      "highlight": [
+        {
+          "start": 1,
+          "end": 9
+        }
+      ],
+      "title": "",
+      "id": "54802"
+    },
+    {
+      "type": "highlight",
+      "description": "Constants define **keccak256** keys, e.g. `SOLVER_IMPL_ACTION_ID_KEY = '0xdcae2680…'` and `REBALANCER_IMPL_ACTION_ID_KEY`, used to look up current IPFS hashes.",
+      "file": "genius-actions/src/services/blockchain/genius-actions/genius-actions.const.ts",
+      "highlight": [
+        {
+          "start": 3,
+          "end": 9
+        }
+      ],
+      "title": "",
+      "id": "54803"
+    },
+    {
+      "type": "highlight",
+      "description": "This function retrieves the IPFS hash for a given action type from the on-chain contract. It first computes the correct storage key for the action, then queries the contract to get the data stored at that key.",
+      "file": "genius-actions/src/services/blockchain/genius-actions/genius-actions.service.ts",
+      "highlight": [
+        {
+          "start": 25,
+          "end": 33
+        }
+      ],
+      "title": "",
+      "id": "54804"
+    },
+    {
+      "type": "textOnly",
+      "description": "Summary:\n1. `Router` swaps to stablecoin & calls `Vault`.\n2. `Vault` locks funds, emits `OrderCreated`.\n3. `Solver` `Lit Action` picks up event & builds execution plan.\n4. `Solana` Anchor `fill_order` authorizes orchestrator & transfers `USDC`.\n5. `GeniusActions` registry lets off-chain logic upgrade dynamically.\n\nNext: deep dives into each component—`Router` internals, `Vault` mechanics, `FeeCollector`, `Solana` instructions, and `Lit Actions`.",
+      "title": "",
+      "id": "54805"
+    }
+  ]
+}

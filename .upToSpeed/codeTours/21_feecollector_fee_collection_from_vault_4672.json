@@ -1,0 +1,179 @@
+{
+  "title": "2.1: FeeCollector: Fee Collection from Vault",
+  "id": "m3nt31lwF+lj4dJhujjMiWYloFtjtMIjzf589GTh3Rk=",
+  "originalId": 4672,
+  "position": 2,
+  "type": "text",
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This walkthrough explores the `collectFromVault` function in the `FeeCollector.sol` contract. This function serves as the exclusive entry point for the `GeniusVault` contract to record and transfer fees from a processed order.",
+      "title": "",
+      "id": "55742"
+    },
+    {
+      "type": "highlight",
+      "description": "The function signature shows it takes four parameters: `_orderHash` for tracking the specific order, `_amountIn` representing the order amount, `_destChainId` for chain-specific fee calculations, and `_orderFee` which is the total fee amount provided by the user. It returns the amount that should be transferred to the **FeeCollector**.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 114,
+          "end": 119
+        }
+      ],
+      "title": "",
+      "id": "55743"
+    },
+    {
+      "type": "highlight",
+      "description": "Before diving into the function logic, it's important to understand the `BASE_PERCENTAGE` constant which is set to 10,000. This represents 100% in basis points, making 1% equal to 100 basis points.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 27,
+          "end": 27
+        }
+      ],
+      "title": "",
+      "id": "55744"
+    },
+    {
+      "type": "highlight",
+      "description": "The function works with the `FeeBreakdown` struct, which contains four components: `baseFee` (fixed operational fee), `bpsFee` (percentage-based fee), `insuranceFee` (stays in vault liquidity), and `totalFee` (sum of all components).",
+      "file": "genius-contracts/src/interfaces/IFeeCollector.sol",
+      "highlight": [
+        {
+          "start": 26,
+          "end": 31
+        }
+      ],
+      "title": "",
+      "id": "55745"
+    },
+    {
+      "type": "highlight",
+      "description": "The function begins with two critical validation checks, using custom errors for gas efficiency. The first check ensures only the authorized `vault` contract can call this function, while the second validates that the order amount is not zero.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 120,
+          "end": 121
+        }
+      ],
+      "title": "",
+      "id": "55746"
+    },
+    {
+      "type": "highlight",
+      "description": "The function calls `_calculateFeeBreakdown` to determine the required fees for this order. This internal function considers the order amount and destination chain to calculate the complete fee structure, returning a `FeeBreakdown` struct with all fee components.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 124,
+          "end": 127
+        }
+      ],
+      "title": "",
+      "id": "55747"
+    },
+    {
+      "type": "highlight",
+      "description": "Here's the fee verification step that ensures the user provided sufficient fees. The function checks that the `_orderFee` is at least equal to the calculated `totalFee`. If insufficient, it reverts with `GeniusErrors.InsufficientFees()`, providing both the provided and required amounts for debugging.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 130,
+          "end": 134
+        }
+      ],
+      "title": "",
+      "id": "55748"
+    },
+    {
+      "type": "highlight",
+      "description": "Any **surplus fee** above the **required minimum** is calculated here. When users provide more fees than required, this surplus is captured and will be allocated to the **operator** as an **additional incentive** for processing the order.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 137,
+          "end": 140
+        }
+      ],
+      "title": "",
+      "id": "55749"
+    },
+    {
+      "type": "highlight",
+      "description": "The fee distribution begins by calculating how much of the basis points fee goes to the protocol versus liquidity providers. The `protocolFee` percentage (using `BASE_PERCENTAGE` of `10,000`) determines this split, with the remainder going to LPs.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 143,
+          "end": 145
+        }
+      ],
+      "title": "",
+      "id": "55750"
+    },
+    {
+      "type": "highlight",
+      "description": "The calculated fees are added to their respective internal accounting buckets for later claiming. Notice on line 152 that the operator receives both the `baseFee` (fixed per-chain fee) and any `feeSurplus` from overpayment. This provides a financial incentive for operators to process orders.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 148,
+          "end": 152
+        }
+      ],
+      "title": "",
+      "id": "55751"
+    },
+    {
+      "type": "highlight",
+      "description": "The `amountToTransfer` calculation represents the actual amount of stablecoin tokens the `vault` should transfer to the `FeeCollector`. It subtracts the `insuranceFee` because this portion remains within the main `vault`'s liquidity pool to provide insurance coverage rather than being transferred out.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 155,
+          "end": 155
+        }
+      ],
+      "title": "",
+      "id": "55752"
+    },
+    {
+      "type": "mcq",
+      "description": "When `collectFromVault` is called, what does the `amountToTransfer` value calculated on line 155 represent?\n\nOptions:\n\n A). The entire fee amount (`_orderFee`) provided by the user.\n\nB). The total fee paid by the user (`_orderFee`) minus the portion designated as an `insuranceFee`.\n\nC). The sum of all calculated fee components (`feeBreakdown.totalFee`).\n\nD). Only the `baseFee` and `bpsFee` components, excluding any surplus or insurance fees.\n\n\nCorrect: B). The total fee paid by the user (`_orderFee`) minus the portion designated as an `insuranceFee`.\n\nExplanation: The correct answer is that `amountToTransfer` represents the total fee paid by the user (`_orderFee`) minus the `insuranceFee`. The `insuranceFee` is intentionally kept within the `GeniusVault` to contribute to its liquidity pool for insurance purposes and is therefore not transferred to the `FeeCollector`. The other options are incorrect because transferring the entire `_orderFee` would wrongly move the insurance funds, while transferring only the calculated `totalFee` would both include the insurance fee and ignore any surplus paid by the user.",
+      "title": "",
+      "id": "55755",
+      "text": "When `collectFromVault` is called, what does the `amountToTransfer` value calculated on line 155 represent?",
+      "answers": [
+        "The entire fee amount (`_orderFee`) provided by the user.",
+        "The total fee paid by the user (`_orderFee`) minus the portion designated as an `insuranceFee`.",
+        "The sum of all calculated fee components (`feeBreakdown.totalFee`).",
+        "Only the `baseFee` and `bpsFee` components, excluding any surplus or insurance fees."
+      ],
+      "correct": 1,
+      "explanation": "The correct answer is that `amountToTransfer` represents the total fee paid by the user (`_orderFee`) minus the `insuranceFee`. The `insuranceFee` is intentionally kept within the `GeniusVault` to contribute to its liquidity pool for insurance purposes and is therefore not transferred to the `FeeCollector`. The other options are incorrect because transferring the entire `_orderFee` would wrongly move the insurance funds, while transferring only the calculated `totalFee` would both include the insurance fee and ignore any surplus paid by the user."
+    },
+    {
+      "type": "highlight",
+      "description": "Finally, the `FeesCollectedFromVault` event is emitted to provide transparent on-chain logging. It records the order hash and the exact amounts allocated to each fee recipient category, enabling off-chain systems to track fee distribution accurately.",
+      "file": "genius-contracts/src/fees/FeeCollector.sol",
+      "highlight": [
+        {
+          "start": 157,
+          "end": 162
+        }
+      ],
+      "title": "",
+      "id": "55753"
+    },
+    {
+      "type": "textOnly",
+      "description": "The `collectFromVault` function demonstrates a comprehensive approach to fee collection with security checks, proper validation, transparent distribution, and detailed event logging. This design ensures fees are collected safely and distributed according to the protocol's economic model while maintaining clear separation between different fee types.",
+      "title": "",
+      "id": "55754"
+    }
+  ]
+}

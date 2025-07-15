@@ -1,0 +1,166 @@
+{
+  "title": "3.1: GeniusVault: Overview",
+  "id": "p4Em6MJ1aVSWTe3P8Q0Rnz3sdnHU9nE07vAIOw4+rJY=",
+  "originalId": 4584,
+  "position": 5,
+  "type": "text",
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This tour orients you through the **three key parts of GeniusVault**: the external API (`IGeniusVault.sol`), the core implementation (`GeniusVaultCore.sol`), and the final deployable contract (`GeniusVault.sol`).",
+      "title": "",
+      "id": "54729"
+    },
+    {
+      "type": "highlight",
+      "description": "IGeniusVault defines staking operations: `stakeDeposit` to mint gUSD by depositing stablecoins, and `stakeWithdraw` to redeem assets by burning gUSD.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 214,
+          "end": 226
+        }
+      ],
+      "title": "",
+      "id": "54730"
+    },
+    {
+      "type": "highlight",
+      "description": "IGeniusVault’s order lifecycle API: `createOrder` adds cross-chain liquidity, `fillOrder` executes swaps on the destination chain, `revertOrder` refunds failed orders, and `fillOrderBatch` processes multiple orders atomically.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 247,
+          "end": 276
+        }
+      ],
+      "title": "",
+      "id": "54731"
+    },
+    {
+      "type": "highlight",
+      "description": "`GeniusVaultCore` inherits `IGeniusVault` and key OpenZeppelin modules: `UUPSUpgradeable` for upgradeability, `ERC20Upgradeable` to mint `gUSD`, `AccessControl` for roles (**admin**, **pauser**, **orchestrator**), and `Pausable` with `ReentrancyGuard` for security.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 30,
+          "end": 37
+        }
+      ],
+      "title": "",
+      "id": "54732"
+    },
+    {
+      "type": "highlight",
+      "description": "**Core state variables:** `STABLECOIN` token, `PROXYCALL` for cross-chain execution, a **Chainlink** `stablecoinPriceFeed`, `totalStakedAssets`, `rebalanceThreshold`, and stablecoin price bounds to guard against depeg events.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 48,
+          "end": 56
+        }
+      ],
+      "title": "",
+      "id": "54733"
+    },
+    {
+      "type": "highlight",
+      "description": "**`stakeDeposit`** increases `totalStakedAssets`, transfers stablecoins from the caller, mints `gUSD` to the receiver, and emits `StakeDeposit`. The reverse **`stakeWithdraw`** burns `gUSD` and returns assets under allowance control.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 171,
+          "end": 183
+        }
+      ],
+      "title": "",
+      "id": "54734"
+    },
+    {
+      "type": "highlight",
+      "description": "**Price guard:** `_verifyStablecoinPrice` fetches the latest `Chainlink` data and reverts if the price is stale, zero, or outside the configured bounds, protecting all cross-chain deposits against stablecoin depeg.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 600,
+          "end": 608
+        }
+      ],
+      "title": "",
+      "id": "54735"
+    },
+    {
+      "type": "highlight",
+      "description": "Constructor disables initializers via `_disableInitializers()`, locking the upgradeable proxy until `initialize()` is invoked.",
+      "file": "genius-contracts/src/GeniusVault.sol",
+      "highlight": [
+        {
+          "start": 30,
+          "end": 33
+        }
+      ],
+      "title": "",
+      "id": "54736"
+    },
+    {
+      "type": "highlight",
+      "description": "External `initialize()`: forwards parameters (`stablecoin`, `admin`, `multicall`, `rebalance threshold`, `price feed`, `bounds`, `max order amount`) to `GeniusVaultCore._initialize` and grants roles.",
+      "file": "genius-contracts/src/GeniusVault.sol",
+      "highlight": [
+        {
+          "start": 42,
+          "end": 50
+        }
+      ],
+      "title": "",
+      "id": "54737"
+    },
+    {
+      "type": "highlight",
+      "description": "`createOrder` override enforces an on-chain price check via `_verifyStablecoinPrice()`, validates amounts, tokens, and chain IDs, then hands off to core logic to register the order.",
+      "file": "genius-contracts/src/GeniusVault.sol",
+      "highlight": [
+        {
+          "start": 69,
+          "end": 84
+        }
+      ],
+      "title": "",
+      "id": "54738"
+    },
+    {
+      "type": "highlight",
+      "description": "**Fee integration in** `createOrder`: calls `feeCollector.collectFromVault` to split protocol vs insurance fees, transfers `stablecoin` from the trader, sends protocol fees to the collector, and accumulates `insuranceFees` in the `vault`.",
+      "file": "genius-contracts/src/GeniusVault.sol",
+      "highlight": [
+        {
+          "start": 101,
+          "end": 110
+        }
+      ],
+      "title": "",
+      "id": "54739"
+    },
+    {
+      "type": "mcq",
+      "description": "Based on the contract structure, where is the stablecoin price verification (`_verifyStablecoinPrice`) invoked to protect against depeg risk when a new cross-chain order is created?\n\nOptions:\n\n A). In the `GeniusVaultCore` implementation of `createOrder`.\n\nB). In the `GeniusVault` contract's override of the `createOrder` function.\n\nC). Within the `stakeDeposit` function, since it handles all incoming stablecoins.\n\nD). In the `IGeniusVault` interface, to enforce it on all implementing contracts.\n\n\nCorrect: B). In the `GeniusVault` contract's override of the `createOrder` function.\n\nExplanation: The `_verifyStablecoinPrice` check is performed in the `GeniusVault` contract's override of `createOrder` (Step 10). This architectural choice separates the core order logic in `GeniusVaultCore` from the final, deployable contract (`GeniusVault`), which adds specific security checks like price verification. The core implementation does not have this check, and interfaces cannot contain implementation logic.",
+      "title": "",
+      "id": "54741",
+      "text": "Based on the contract structure, where is the stablecoin price verification (`_verifyStablecoinPrice`) invoked to protect against depeg risk when a new cross-chain order is created?",
+      "answers": [
+        "In the `GeniusVaultCore` implementation of `createOrder`.",
+        "In the `GeniusVault` contract's override of the `createOrder` function.",
+        "Within the `stakeDeposit` function, since it handles all incoming stablecoins.",
+        "In the `IGeniusVault` interface, to enforce it on all implementing contracts."
+      ],
+      "correct": 1,
+      "explanation": "The `_verifyStablecoinPrice` check is performed in the `GeniusVault` contract's override of `createOrder` (Step 10). This architectural choice separates the core order logic in `GeniusVaultCore` from the final, deployable contract (`GeniusVault`), which adds specific security checks like price verification. The core implementation does not have this check, and interfaces cannot contain implementation logic."
+    },
+    {
+      "type": "textOnly",
+      "description": "You’ve now seen `IGeniusVault`’s API, `GeniusVaultCore`’s modules, state and key operations, and how `GeniusVault` wires initialization and fee policy—ready for a deeper dive.",
+      "title": "",
+      "id": "54740"
+    }
+  ]
+}

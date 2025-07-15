@@ -1,0 +1,173 @@
+{
+  "title": "3.3: GeniusVaultCore: State and Configuration",
+  "id": "sp3mWy1mxsn1BXkbsPqG9NFcDKfjzmibVM6DGdEwWcU=",
+  "originalId": 4590,
+  "position": 7,
+  "type": "text",
+  "steps": [
+    {
+      "type": "highlight",
+      "description": "**Core configuration** covers **price oracle**, **staking total**, **rebalance threshold**, **price bounds**, **legacy fee mapping**, the `orderStatus` mapping for order lifecycle, **order caps**, **oracle heartbeat**, **per-chain decimals**, and the `feeCollector` address.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 52,
+          "end": 70
+        }
+      ],
+      "title": "",
+      "id": "54776"
+    },
+    {
+      "type": "highlight",
+      "description": "`OrderStatus` enum defines each cross-chain order lifecycle state.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 18,
+          "end": 23
+        }
+      ],
+      "title": "",
+      "id": "54777"
+    },
+    {
+      "type": "highlight",
+      "description": "`_verifyStablecoinPrice` enforces data freshness and bounds from `Chainlink`.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 600,
+          "end": 613
+        }
+      ],
+      "title": "",
+      "id": "54778"
+    },
+    {
+      "type": "highlight",
+      "description": "`stakeDeposit` updates pool liability, pulls stablecoin, mints `gUSD` 1:1, and emits `StakeDeposit` for off-chain indexers.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 168,
+          "end": 181
+        }
+      ],
+      "title": "",
+      "id": "54779"
+    },
+    {
+      "type": "highlight",
+      "description": "`stakeWithdraw` handles delegated allowance, checks balances, reduces liabilities, burns `gUSD`, emits `StakeWithdraw`, and transfers out `stablecoin`.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 189,
+          "end": 212
+        }
+      ],
+      "title": "",
+      "id": "54780"
+    },
+    {
+      "type": "mcq",
+      "description": "Based on the provided code, which function is designed to directly decrease the `totalStakedAssets` state variable?\n\nOptions:\n\n A). stakeDeposit\n\nB). revertOrder\n\nC). stakeWithdraw\n\nD). _fillOrder\n\n\nCorrect: C). stakeWithdraw\n\nExplanation: `stakeWithdraw` (line 206) explicitly decreases `totalStakedAssets` when a user withdraws their staked stablecoins. In contrast, `stakeDeposit` increases this value. `revertOrder` and `_fillOrder` manage the lifecycle of a cross-chain order but do not alter the total amount of assets staked in the vault.",
+      "title": "",
+      "id": "54789",
+      "text": "Based on the provided code, which function is designed to directly decrease the `totalStakedAssets` state variable?",
+      "answers": [
+        "stakeDeposit",
+        "revertOrder",
+        "stakeWithdraw",
+        "_fillOrder"
+      ],
+      "correct": 2,
+      "explanation": "`stakeWithdraw` (line 206) explicitly decreases `totalStakedAssets` when a user withdraws their staked stablecoins. In contrast, `stakeDeposit` increases this value. `revertOrder` and `_fillOrder` manage the lifecycle of a cross-chain order but do not alter the total amount of assets staked in the vault."
+    },
+    {
+      "type": "highlight",
+      "description": "Fee accounting state:\n- `deprecated_feesCollected` and `deprecated_feesClaimed` for legacy tracking\n- `insuranceFeesAccumulated` retains insurance portion to bolster vault liquidity",
+      "file": "genius-contracts/src/GeniusVault.sol",
+      "highlight": [
+        {
+          "start": 18,
+          "end": 28
+        }
+      ],
+      "title": "",
+      "id": "54781"
+    },
+    {
+      "type": "highlight",
+      "description": "`createOrder` calls `feeCollector.collectFromVault`, captures `insurance slice`, then pulls entire order amount into the vault.",
+      "file": "genius-contracts/src/GeniusVault.sol",
+      "highlight": [
+        {
+          "start": 100,
+          "end": 109
+        }
+      ],
+      "title": "",
+      "id": "54782"
+    },
+    {
+      "type": "highlight",
+      "description": "After funds arrive, `createOrder` sets `orderStatus` to `Created` and emits `OrderCreated` for off-chain monitoring.",
+      "file": "genius-contracts/src/GeniusVault.sol",
+      "highlight": [
+        {
+          "start": 119,
+          "end": 128
+        }
+      ],
+      "title": "",
+      "id": "54783"
+    },
+    {
+      "type": "highlight",
+      "description": "`revertOrder` transitions mapping to `Reverted`, refunds post-fee amount, and emits `OrderReverted`. ",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 228,
+          "end": 234
+        }
+      ],
+      "title": "",
+      "id": "54784"
+    },
+    {
+      "type": "highlight",
+      "description": "`_fillOrder` marks mapping to `Filled` and emits `OrderFilled` with effective amounts and success flag.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 333,
+          "end": 336
+        }
+      ],
+      "title": "",
+      "id": "54785"
+    },
+    {
+      "type": "highlight",
+      "description": "Admin setters (`setMaxOrderAmount`, `setPriceFeed`, `setStablePriceBounds`, `setPriceFeedHeartbeat`) call internal setters on validated inputs, updating state and emitting events like `MaxOrderAmountChanged` for governance transparency.",
+      "file": "genius-contracts/src/GeniusVaultCore.sol",
+      "highlight": [
+        {
+          "start": 529,
+          "end": 555
+        }
+      ],
+      "title": "",
+      "id": "54786"
+    },
+    {
+      "type": "textOnly",
+      "description": "By combining initialization of core parameters, state declarations, price checks, staking mint/burn logic, orderStatus lifecycle mapping, feeCollector integration, and event-driven admin setters, `GeniusVaultCore.sol` defines the state, rules, and lifecycle for its cross-chain vault operations.",
+      "title": "",
+      "id": "54787"
+    }
+  ]
+}

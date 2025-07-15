@@ -1,0 +1,240 @@
+{
+  "title": "3.2: GeniusVault Interface (IGeniusVault.sol)",
+  "id": "rys81MAutWSwmmPs6b4D08IljGq283KSXU/EidviBKk=",
+  "originalId": 4591,
+  "position": 6,
+  "type": "text",
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This tour explores the `IGeniusVault.sol` interface, which defines the external API for the GeniusVault contract. We’ll examine its events and functions to understand how the vault handles staking, cross-chain orders, and administrative configuration.",
+      "title": "",
+      "id": "54758"
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "genius-contracts/src/interfaces/IGeniusVault.sol"
+      ],
+      "description": "The `IGeniusVault` interface exposes all public entrypoints of the vault, including events for off-chain orchestration and functions grouped by stakeholder, order lifecycle, and admin roles.",
+      "title": "",
+      "id": "54759"
+    },
+    {
+      "type": "highlight",
+      "description": "Stake & Withdraw events allow monitoring of users depositing and withdrawing stablecoins:\n- `StakeDeposit` (lines 76–80) fires when a caller stakes tokens and mints gUSD for the receiver.\n- `StakeWithdraw` (lines 90–94) fires when a caller burns gUSD to withdraw tokens to a receiver.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 76,
+          "end": 94
+        }
+      ],
+      "title": "",
+      "id": "54760"
+    },
+    {
+      "type": "highlight",
+      "description": "`OrderCreated` (lines 109–120) is emitted on the source chain when `createOrder` is called. Off-chain orchestrators listen for this event to pick up new cross-chain swap requests.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 109,
+          "end": 120
+        }
+      ],
+      "title": "",
+      "id": "54761"
+    },
+    {
+      "type": "highlight",
+      "description": "`OrderFilled` (lines 134–144) is emitted on the destination chain when an orchestrator calls `fillOrder` or `fillOrderBatch`. It confirms token delivery, reports effective amounts, and flags arbitrary-call success.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 134,
+          "end": 144
+        }
+      ],
+      "title": "",
+      "id": "54762"
+    },
+    {
+      "type": "highlight",
+      "description": "`OrderReverted` (lines 146–152) is emitted on the source chain when `revertOrder` is executed. It signals that an order couldn’t be processed and has been refunded.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 146,
+          "end": 152
+        }
+      ],
+      "title": "",
+      "id": "54763"
+    },
+    {
+      "type": "mcq",
+      "description": "An orchestrator detects an `OrderCreated` event on a source chain. To successfully process this cross-chain swap, what is the primary action the orchestrator must take on the destination chain?\n\nOptions:\n\n A). Call `fillOrder` with the corresponding order details, which will emit an `OrderFilled` event upon completion.\n\nB). Call `revertOrder` on the source chain to signal that the order is being processed.\n\nC). Call `createOrder` on the destination chain to mirror the source chain's state.\n\nD). Wait for a `StakeDeposit` event on the destination chain to confirm liquidity is available.\n\n\nCorrect: A). Call `fillOrder` with the corresponding order details, which will emit an `OrderFilled` event upon completion.\n\nExplanation: Correct. After an `OrderCreated` event is emitted on the source chain, an off-chain orchestrator's role is to execute the swap on the destination chain by calling `fillOrder` (or `fillOrderBatch`). This function, upon successful execution, emits the `OrderFilled` event, signaling the completion of the cross-chain transaction. `revertOrder` is for cancellations, and `createOrder` is only used on the source chain.",
+      "title": "",
+      "id": "54788",
+      "text": "An orchestrator detects an `OrderCreated` event on a source chain. To successfully process this cross-chain swap, what is the primary action the orchestrator must take on the destination chain?",
+      "answers": [
+        "Call `fillOrder` with the corresponding order details, which will emit an `OrderFilled` event upon completion.",
+        "Call `revertOrder` on the source chain to signal that the order is being processed.",
+        "Call `createOrder` on the destination chain to mirror the source chain's state.",
+        "Wait for a `StakeDeposit` event on the destination chain to confirm liquidity is available."
+      ],
+      "correct": 0,
+      "explanation": "Correct. After an `OrderCreated` event is emitted on the source chain, an off-chain orchestrator's role is to execute the swap on the destination chain by calling `fillOrder` (or `fillOrderBatch`). This function, upon successful execution, emits the `OrderFilled` event, signaling the completion of the cross-chain transaction. `revertOrder` is for cancellations, and `createOrder` is only used on the source chain."
+    },
+    {
+      "type": "highlight",
+      "description": "Rebalancing events:\n- `RebalancedLiquidity` (lines 155–159) shows funds bridged for liquidity rebalancing.\n- `RebalanceThresholdChanged` (lines 161–165) logs updates to the rebalance threshold parameter.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 155,
+          "end": 165
+        }
+      ],
+      "title": "",
+      "id": "54764"
+    },
+    {
+      "type": "highlight",
+      "description": "Configuration events:\n- `ProxyCallChanged` (lines 168–172) updates the proxy-call contract used for swaps or arbitrary calls.\n- `MaxOrderAmountChanged` (line 173) caps the maximum order size.\n- `PriceFeedHeartbeatChanged` (line 175) sets the allowed staleness of the price feed.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 167,
+          "end": 176
+        }
+      ],
+      "title": "",
+      "id": "54765"
+    },
+    {
+      "type": "highlight",
+      "description": "More configuration events:\n- **ChainStablecoinDecimalsChanged** (`179–183`) sets stablecoin decimals per chain.\n- **PriceFeedUpdated** (`185–188`) switches the price-feed oracle.\n- **FeeCollectorChanged** (`191–194`) assigns the fee-collector contract.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 177,
+          "end": 194
+        }
+      ],
+      "title": "",
+      "id": "54766"
+    },
+    {
+      "type": "highlight",
+      "description": "Stake & Withdraw functions:\n- `stakeDeposit` (`214–219`) lets users deposit stablecoin and receive gUSD.\n- `stakeWithdraw` (`220–226`) burns gUSD, pulls allowance if needed, and sends stablecoin back.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 214,
+          "end": 222
+        }
+      ],
+      "title": "",
+      "id": "54767"
+    },
+    {
+      "type": "highlight",
+      "description": "`createOrder` (243–248) locks stablecoin for a new cross-chain swap and emits `OrderCreated` on success.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 243,
+          "end": 248
+        }
+      ],
+      "title": "",
+      "id": "54768"
+    },
+    {
+      "type": "highlight",
+      "description": "`fillOrder` (250–257) is called by an orchestrator on the destination chain to perform a swap and/or arbitrary call, then emits `OrderFilled`.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 249,
+          "end": 257
+        }
+      ],
+      "title": "",
+      "id": "54769"
+    },
+    {
+      "type": "highlight",
+      "description": "`fillOrderBatch` (263–271) bundles multiple orders into one transaction, checking array lengths before looping through each order’s fill logic.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 263,
+          "end": 271
+        }
+      ],
+      "title": "",
+      "id": "54770"
+    },
+    {
+      "type": "highlight",
+      "description": "`revertOrder` (273–276) lets an orchestrator cancel and refund an order by verifying a signature and emitting `OrderReverted`.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 273,
+          "end": 276
+        }
+      ],
+      "title": "",
+      "id": "54771"
+    },
+    {
+      "type": "highlight",
+      "description": "**Admin configuration:**\n- `setRebalanceThreshold` (301–303) changes how much of the staked assets can be used before rebalancing.\n- `setProxyCall` (304–307) assigns the proxy-call contract address.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 301,
+          "end": 307
+        }
+      ],
+      "title": "",
+      "id": "54772"
+    },
+    {
+      "type": "highlight",
+      "description": "Further admin setters:\n- `setStablePriceBounds` (314–318) guards against stablecoin de-pegs.\n- `setMaxOrderAmount` (320–323) caps per-order size.\n- `setChainStablecoinDecimals` (326–333) configures decimals for each chain.\n- `setPriceFeedHeartbeat` (336–339) controls price feed staleness.\n- `setFeeCollector` (341–345) points to the fee collector contract.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 314,
+          "end": 345
+        }
+      ],
+      "title": "",
+      "id": "54773"
+    },
+    {
+      "type": "highlight",
+      "description": "**Emergency controls:**\n- `pause` (348–350) locks all functions.\n- `unpause` (352–355) unlocks after a pause.",
+      "file": "genius-contracts/src/interfaces/IGeniusVault.sol",
+      "highlight": [
+        {
+          "start": 348,
+          "end": 355
+        }
+      ],
+      "title": "",
+      "id": "54774"
+    },
+    {
+      "type": "textOnly",
+      "description": "With this, you have a structured view of the **public API** of `IGeniusVault`: events for off-chain orchestration, user-facing stake/withdraw and order functions, and admin setters to tune and secure the vault’s behavior.",
+      "title": "",
+      "id": "54775"
+    }
+  ]
+}
